@@ -6,9 +6,10 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
-// Add DbContext
+// Add DbContext with Supabase (PostgreSQL) connection
+var connectionString = builder.Configuration.GetConnectionString("SupabaseConnection");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlite("Data Source=eventmanagement.db"));
+    options.UseNpgsql(connectionString));
 
 // Add session support for login
 builder.Services.AddSession(options =>

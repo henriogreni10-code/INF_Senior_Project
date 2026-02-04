@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "/Users/henriogreni/Documents/INF_Senior_Project/INF_SP/INF_SP.csproj": {}
+    "/Users/henriogreni/Documents/INF_Senior_Project/INF_SP.csproj": {}
   },
   "projects": {
-    "/Users/henriogreni/Documents/INF_Senior_Project/INF_SP/INF_SP.csproj": {
+    "/Users/henriogreni/Documents/INF_Senior_Project/INF_SP.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/Users/henriogreni/Documents/INF_Senior_Project/INF_SP/INF_SP.csproj",
+        "projectUniqueName": "/Users/henriogreni/Documents/INF_Senior_Project/INF_SP.csproj",
         "projectName": "INF_SP",
-        "projectPath": "/Users/henriogreni/Documents/INF_Senior_Project/INF_SP/INF_SP.csproj",
+        "projectPath": "/Users/henriogreni/Documents/INF_Senior_Project/INF_SP.csproj",
         "packagesPath": "/Users/henriogreni/.nuget/packages/",
-        "outputPath": "/Users/henriogreni/Documents/INF_Senior_Project/INF_SP/obj/",
+        "outputPath": "/Users/henriogreni/Documents/INF_Senior_Project/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "/Users/henriogreni/.nuget/NuGet/NuGet.Config"
@@ -64,9 +64,9 @@
               "target": "Package",
               "version": "[9.0.0, )"
             },
-            "Npgsql": {
+            "Npgsql.EntityFrameworkCore.PostgreSQL": {
               "target": "Package",
-              "version": "[3.1.7, )"
+              "version": "[9.0.3, )"
             }
           },
           "imports": [

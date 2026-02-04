@@ -21,6 +21,6 @@ namespace INF_SP.Models
         [Required]
         public string UserType { get; set; } // "Organizer", "Vendor", "Attendee"
         
-        public DateTime CreatedAt { get; set; } = DateTime.Now;
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }
 }
