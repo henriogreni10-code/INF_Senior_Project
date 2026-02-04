@@ -1,0 +1,49 @@
+﻿@model IEnumerable<INF_SP.Models.Event>
+
+@{
+    ViewData["Title"] = "Browse Events";
+}
+
+<div class="container mt-4">
+    <h2>Browse Events</h2>
+    
+    <form asp-action="Index" method="get" class="mb-4">
+        <div class="input-group">
+            <input type="text" name="searchString" class="form-control" placeholder="Search events..." value="@ViewData["SearchString"]">
+            <button class="btn btn-primary" type="submit">Search</button>
+        </div>
+    </form>
+
+    <div class="row">
+        @if (Model.Any())
+        {
+            @foreach (var item in Model)
+            {
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">@item.Title</h5>
+                            <p class="card-text">@item.Description.Substring(0, Math.Min(100, item.Description.Length))...</p>
+                            <p class="text-muted">
+                                <i class="bi bi-calendar"></i> @item.EventDate.ToString("MMM dd, yyyy")<br>
+                                <i class="bi bi-clock"></i> @item.StartTime.ToString(@"hh\:mm") - @item.EndTime.ToString(@"hh\:mm")<br>
+                                <i class="bi bi-geo-alt"></i> @item.Location<br>
+                                <i class="bi bi-people"></i> @item.Bookings?.Count / @item.Capacity
+                            </p>
+                            <p class="badge bg-secondary">@item.Category</p>
+                        </div>
+                        <div class="card-footer">
+                            <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-primary btn-sm">View Details</a>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="col-12">
+                <div class="alert alert-info">No events found.</div>
+            </div>
+        }
+    </div>
+</div>

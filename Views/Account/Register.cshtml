@@ -1,0 +1,52 @@
+@model INF_SP.Models.User
+
+@{
+    ViewData["Title"] = "Register";
+}
+
+<div class="row justify-content-center mt-5">
+    <div class="col-md-4">
+        <h2 class="text-center mb-4">Register</h2>
+        
+        <form method="post" asp-action="Register">
+            <div class="mb-3">
+                <label asp-for="Name" class="form-label">Name</label>
+                <input asp-for="Name" class="form-control">
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+            
+            <div class="mb-3">
+                <label asp-for="Email" class="form-label">Email</label>
+                <input asp-for="Email" class="form-control">
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+            
+            <div class="mb-3">
+                <label asp-for="Password" class="form-label">Password</label>
+                <input asp-for="Password" class="form-control">
+                <span asp-validation-for="Password" class="text-danger"></span>
+            </div>
+            
+            <div class="mb-3">
+                <label asp-for="UserType" class="form-label">User Type</label>
+                <select asp-for="UserType" class="form-select">
+                    <option value="Attendee">Attendee</option>
+                    <option value="Organizer">Event Organizer</option>
+                    <option value="Vendor">Vendor</option>
+                </select>
+            </div>
+            
+            <button type="submit" class="btn btn-primary w-100">Register</button>
+            
+            @Html.AntiForgeryToken()
+        </form>
+        
+        <div class="text-center mt-3">
+            <p>Already have an account? <a asp-action="Login">Login here</a></p>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

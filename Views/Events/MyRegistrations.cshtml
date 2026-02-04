@@ -1,0 +1,53 @@
+﻿@model IEnumerable<INF_SP.Models.Booking>
+
+@{
+    ViewData["Title"] = "My Registrations";
+}
+
+<div class="container mt-4">
+    <h2>My Registered Events</h2>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show">
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (Model.Any())
+    {
+        <div class="row">
+            @foreach (var booking in Model)
+            {
+                <div class="col-md-6 mb-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">@booking.Event?.Title</h5>
+                            <p class="card-text">
+                                <strong>Date:</strong> @booking.Event?.EventDate.ToString("MMMM dd, yyyy")<br>
+                                <strong>Time:</strong> @booking.Event?.StartTime.ToString(@"hh\:mm tt") - @booking.Event?.EndTime.ToString(@"hh\:mm tt")<br>
+                                <strong>Location:</strong> @booking.Event?.Location<br>
+                                <strong>Organizer:</strong> @booking.Event?.Organizer?.Name<br>
+                                <strong>Registered:</strong> @booking.BookingDate.ToString("MMM dd, yyyy")
+                            </p>
+                        </div>
+                        <div class="card-footer">
+                            <a asp-action="Details" asp-route-id="@booking.EventId" class="btn btn-primary btn-sm">View Details</a>
+                            <form asp-action="CancelRSVP" asp-route-id="@booking.EventId" method="post" style="display:inline;">
+                                <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to cancel your registration?')">Cancel RSVP</button>
+                                @Html.AntiForgeryToken()
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info">
+            You haven't registered for any events yet. <a asp-action="Index">Browse events</a>
+        </div>
+    }
+</div>

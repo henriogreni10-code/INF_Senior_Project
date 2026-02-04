@@ -1,0 +1,97 @@
+﻿@model INF_SP.Models.Event
+
+@{
+    ViewData["Title"] = "Event Details";
+}
+
+<div class="container mt-4">
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show">
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show">
+            @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="card">
+        <div class="card-header">
+            <h2>@Model.Title</h2>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-8">
+                    <h5>Description</h5>
+                    <p>@Model.Description</p>
+                    
+                    <h5 class="mt-4">Event Details</h5>
+                    <table class="table">
+                        <tr>
+                            <th>Date:</th>
+                            <td>@Model.EventDate.ToString("MMMM dd, yyyy")</td>
+                        </tr>
+                        <tr>
+                            <th>Time:</th>
+                            <td>@Model.StartTime.ToString(@"hh\:mm tt") - @Model.EndTime.ToString(@"hh\:mm tt")</td>
+                        </tr>
+                        <tr>
+                            <th>Location:</th>
+                            <td>@Model.Location</td>
+                        </tr>
+                        <tr>
+                            <th>Category:</th>
+                            <td><span class="badge bg-secondary">@Model.Category</span></td>
+                        </tr>
+                        <tr>
+                            <th>Capacity:</th>
+                            <td>@Model.Bookings?.Count / @Model.Capacity attendees</td>
+                        </tr>
+                        <tr>
+                            <th>Organizer:</th>
+                            <td>@Model.Organizer?.Name</td>
+                        </tr>
+                    </table>
+                </div>
+                
+                <div class="col-md-4">
+                    @if (Context.Session.GetString("UserType") == "Attendee")
+                    {
+                        @if (ViewBag.IsRegistered == true)
+                        {
+                            <div class="alert alert-success">
+                                <i class="bi bi-check-circle"></i> You are registered for this event
+                            </div>
+                        }
+                        else
+                        {
+                            @if (Model.Bookings?.Count < Model.Capacity)
+                            {
+                                <form asp-action="RSVP" asp-route-id="@Model.Id" method="post">
+                                    <button type="submit" class="btn btn-success btn-lg w-100">
+                                        <i class="bi bi-calendar-check"></i> RSVP Now
+                                    </button>
+                                    @Html.AntiForgeryToken()
+                                </form>
+                            }
+                            else
+                            {
+                                <div class="alert alert-warning">
+                                    Event is at full capacity
+                                </div>
+                            }
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="card-footer">
+            <a asp-action="Index" class="btn btn-secondary">Back to Events</a>
+        </div>
+    </div>
+</div>

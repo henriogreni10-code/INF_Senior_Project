@@ -1,0 +1,60 @@
+﻿@model INF_SP.Models.Vendor
+
+@{
+    ViewData["Title"] = "Create Vendor Profile";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <h2>Create Your Vendor Profile</h2>
+            
+            <form asp-action="CreateProfile" method="post">
+                <div class="mb-3">
+                    <label asp-for="BusinessName" class="form-label">Business Name</label>
+                    <input asp-for="BusinessName" class="form-control" />
+                    <span asp-validation-for="BusinessName" class="text-danger"></span>
+                </div>
+                
+                <div class="mb-3">
+                    <label asp-for="ServiceType" class="form-label">Service Type</label>
+                    <select asp-for="ServiceType" class="form-select">
+                        <option value="">Select service type...</option>
+                        <option value="Catering">Catering</option>
+                        <option value="Photography">Photography</option>
+                        <option value="Videography">Videography</option>
+                        <option value="DJ/Music">DJ/Music</option>
+                        <option value="Decorations">Decorations</option>
+                        <option value="Venue">Venue</option>
+                        <option value="Planning">Event Planning</option>
+                        <option value="Other">Other</option>
+                    </select>
+                    <span asp-validation-for="ServiceType" class="text-danger"></span>
+                </div>
+                
+                <div class="mb-3">
+                    <label asp-for="Description" class="form-label">Description</label>
+                    <textarea asp-for="Description" class="form-control" rows="5"></textarea>
+                    <span asp-validation-for="Description" class="text-danger"></span>
+                </div>
+                
+                <div class="mb-3">
+                    <label asp-for="PriceRange" class="form-label">Price Range</label>
+                    <input asp-for="PriceRange" class="form-control" placeholder="e.g., $500 - $2000" />
+                    <span asp-validation-for="PriceRange" class="text-danger"></span>
+                </div>
+                
+                <div class="mb-3">
+                    <button type="submit" class="btn btn-primary">Create Profile</button>
+                    <a asp-controller="Home" asp-action="Index" class="btn btn-secondary">Cancel</a>
+                </div>
+                
+                @Html.AntiForgeryToken()
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

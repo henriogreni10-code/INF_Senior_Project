@@ -1,0 +1,39 @@
+﻿@model INF_SP.Models.Vendor
+
+@{
+    ViewData["Title"] = "My Vendor Profile";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>My Vendor Profile</h2>
+        <a asp-action="EditProfile" class="btn btn-warning">Edit Profile</a>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h3>@Model.BusinessName</h3>
+            <p class="badge bg-info text-dark">@Model.ServiceType</p>
+        </div>
+        <div class="card-body">
+            <h5>Description</h5>
+            <p>@Model.Description</p>
+            
+            <h5 class="mt-4">Details</h5>
+            <table class="table">
+                <tr>
+                    <th>Service Type:</th>
+                    <td>@Model.ServiceType</td>
+                </tr>
+                <tr>
+                    <th>Price Range:</th>
+                    <td>@Model.PriceRange</td>
+                </tr>
+                <tr>
+                    <th>Profile Created:</th>
+                    <td>@Model.CreatedAt.ToString("MMMM dd, yyyy")</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</div>

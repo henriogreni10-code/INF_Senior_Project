@@ -1,0 +1,75 @@
+﻿@model INF_SP.Models.Vendor
+
+@{
+    ViewData["Title"] = "Vendor Profile";
+}
+
+<div class="container mt-4">
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show">
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="card">
+        <div class="card-header">
+            <h2>@Model.BusinessName</h2>
+            <p class="badge bg-info text-dark">@Model.ServiceType</p>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-8">
+                    <h5>About</h5>
+                    <p>@Model.Description</p>
+                    
+                    <h5 class="mt-4">Details</h5>
+                    <table class="table">
+                        <tr>
+                            <th>Service Type:</th>
+                            <td>@Model.ServiceType</td>
+                        </tr>
+                        <tr>
+                            <th>Price Range:</th>
+                            <td>@Model.PriceRange</td>
+                        </tr>
+                        <tr>
+                            <th>Contact Person:</th>
+                            <td>@Model.User?.Name</td>
+                        </tr>
+                        <tr>
+                            <th>Email:</th>
+                            <td>@Model.User?.Email</td>
+                        </tr>
+                    </table>
+                </div>
+                
+                <div class="col-md-4">
+                    @if (Context.Session.GetString("UserId") != null && Context.Session.GetString("UserId") != Model.UserId.ToString())
+                    {
+                        <div class="card">
+                            <div class="card-header">
+                                <h5>Contact Vendor</h5>
+                            </div>
+                            <div class="card-body">
+                                <form asp-action="SendMessage" method="post">
+                                    <input type="hidden" name="vendorId" value="@Model.Id" />
+                                    <div class="mb-3">
+                                        <label for="messageText" class="form-label">Message</label>
+                                        <textarea name="messageText" class="form-control" rows="4" required></textarea>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary w-100">Send Message</button>
+                                    @Html.AntiForgeryToken()
+                                </form>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="card-footer">
+            <a asp-action="Index" class="btn btn-secondary">Back to Directory</a>
+        </div>
+    </div>
+</div>
