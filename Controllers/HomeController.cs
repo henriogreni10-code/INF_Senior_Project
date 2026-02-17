@@ -17,20 +17,25 @@ public class HomeController : Controller
         _context = context;
     }
 
-    public IActionResult Index()
-    {
-        return View();
-    }
+    public async Task<IActionResult> Index()
+        {
+            // Get upcoming events (next 30 days)
+            var upcomingEvents = await _context.Events
+                .Where(e => e.EventDate >= DateTime.UtcNow && e.EventDate <= DateTime.UtcNow.AddDays(30))
+                .Include(e => e.Organizer)
+                .Include(e => e.Bookings)
+                .OrderBy(e => e.EventDate)
+                .Take(6)
+                .ToListAsync();
+
+            return View(upcomingEvents);
+        }
 
     public IActionResult Privacy()
     {
         return View();
     }
 
-    /// <summary>
-    /// Test endpoint to verify Supabase database connection
-    /// Access via: /Home/TestConnection
-    /// </summary>
     public async Task<IActionResult> TestConnection()
     {
         try

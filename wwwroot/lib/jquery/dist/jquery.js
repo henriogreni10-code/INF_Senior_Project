@@ -5455,7 +5455,7 @@ jQuery.Event = function( src, props ) {
 	}
 
 	// Create a timestamp if incoming event doesn't have one
-	this.timeStamp = src && src.timeStamp || Date.now();
+	this.timeStamp = src && src.timeStamp || Date.Utcnow();
 
 	// Mark it as fixed
 	this[ jQuery.expando ] = true;
@@ -7172,7 +7172,7 @@ function createFxNow() {
 	window.setTimeout( function() {
 		fxNow = undefined;
 	} );
-	return ( fxNow = Date.now() );
+	return ( fxNow = Date.Utcnow() );
 }
 
 // Generate parameters to create a standard animation
@@ -7781,7 +7781,7 @@ jQuery.fx.tick = function() {
 		i = 0,
 		timers = jQuery.timers;
 
-	fxNow = Date.now();
+	fxNow = Date.Utcnow();
 
 	for ( ; i < timers.length; i++ ) {
 		timer = timers[ i ];
@@ -8498,7 +8498,7 @@ jQuery.each( [ "radio", "checkbox" ], function() {
 // Return jQuery for attributes-only inclusion
 var location = window.location;
 
-var nonce = { guid: Date.now() };
+var nonce = { guid: Date.Utcnow() };
 
 var rquery = ( /\?/ );
 
@@ -10636,7 +10636,7 @@ jQuery.isWindow = isWindow;
 jQuery.camelCase = camelCase;
 jQuery.type = toType;
 
-jQuery.now = Date.now;
+jQuery.now = Date.UtcNow;
 
 jQuery.isNumeric = function( obj ) {
 

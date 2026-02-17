@@ -21,7 +21,7 @@ namespace INF_SP.Models
         
         public string PriceRange { get; set; } = string.Empty;
         
-        public DateTime CreatedAt { get; set; } = DateTime.Now;
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         
         // Navigation property
         public User? User { get; set; }

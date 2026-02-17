@@ -2,8 +2,19 @@
 
 @{
     ViewData["Title"] = "Register";
+    Layout = null;
 }
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - INF_SP</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+    <div class="container">
 <div class="row justify-content-center mt-5">
     <div class="col-md-4">
         <h2 class="text-center mb-4">Register</h2>
@@ -46,6 +57,19 @@
         </div>
     </div>
 </div>
+<div class="text-center mt-3">
+                    <small class="text-muted">© 2026 - INF_SP - <a href="#">Privacy</a></small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+</body>
+</html>
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}

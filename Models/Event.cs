@@ -38,10 +38,40 @@ namespace INF_SP.Models
         
         public string Category { get; set; } = string.Empty;
         
-        public DateTime CreatedAt { get; set; } = DateTime.Now;
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow; 
         
         // Navigation property
         public User? Organizer { get; set; }
         public ICollection<Booking>? Bookings { get; set; }
+        //Date Validation
+        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+        {
+            // Check if event date is in the past
+            if (EventDate.Date < DateTime.UtcNow.Date)
+            {
+                yield return new ValidationResult(
+                    "Event date cannot be in the past.",
+                    new[] { nameof(EventDate) }
+                );
+            }
+
+            // Check if start time is after end time
+            if (StartTime >= EndTime)
+            {
+                yield return new ValidationResult(
+                    "Start time must be before end time.",
+                    new[] { nameof(StartTime), nameof(EndTime) }
+                );
+            }
+
+            // Check if event is at least 30 minutes long
+            if ((EndTime - StartTime).TotalMinutes < 30)
+            {
+                yield return new ValidationResult(
+                    "Event must be at least 30 minutes long.",
+                    new[] { nameof(EndTime) }
+                );
+            }
+        }
     }
 }

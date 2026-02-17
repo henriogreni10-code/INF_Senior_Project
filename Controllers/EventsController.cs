@@ -18,7 +18,7 @@ namespace INF_SP.Controllers
         public async Task<IActionResult> Index(string searchString)
         {
             var events = from e in _context.Events
-                         where e.EventDate >= DateTime.Now
+                         where e.EventDate >= DateTime.UtcNow
                          select e;
 
             if (!string.IsNullOrEmpty(searchString))
@@ -120,19 +120,22 @@ namespace INF_SP.Controllers
             if (string.IsNullOrEmpty(userIdString))
             {
                 return RedirectToAction("Login", "Account");
-            }
-
-            eventItem.OrganizerId = int.Parse(userIdString);
-
-            if (ModelState.IsValid)
-            {
-                _context.Add(eventItem);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(MyEvents));
-            }
-            return View(eventItem);
         }
 
+            eventItem.OrganizerId = int.Parse(userIdString);
+            eventItem.EventDate = DateTime.SpecifyKind(
+            eventItem.EventDate, DateTimeKind.Utc);
+
+        if (ModelState.IsValid)
+        {
+            _context.Add(eventItem);
+            await _context.SaveChangesAsync();
+            TempData["Success"] = "Event created successfully!";
+            return RedirectToAction(nameof(MyEvents));
+        }
+    
+        return View(eventItem);
+    }
         // GET: Events/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
@@ -146,6 +149,9 @@ namespace INF_SP.Controllers
             {
                 return NotFound();
             }
+
+            eventItem.EventDate = DateTime.SpecifyKind(
+            eventItem.EventDate, DateTimeKind.Utc);
 
             // Check if current user is the organizer
             var userIdString = HttpContext.Session.GetString("UserId");
@@ -179,6 +185,7 @@ namespace INF_SP.Controllers
                 {
                     _context.Update(eventItem);
                     await _context.SaveChangesAsync();
+                    TempData["Success"] = "Event updated successfully!";
                 }
                 catch (DbUpdateConcurrencyException)
                 {

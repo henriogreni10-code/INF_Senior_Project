@@ -19,7 +19,7 @@ namespace INF_SP.Models
         [Required]
         public string MessageText { get; set; } = string.Empty;
         
-        public DateTime SentAt { get; set; } = DateTime.Now;
+        public DateTime SentAt { get; set; } = DateTime.UtcNow;
         
         public bool IsRead { get; set; } = false;
         

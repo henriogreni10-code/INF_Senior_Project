@@ -1,7 +1,74 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@model IEnumerable<INF_SP.Models.Event>
+
+@{
+    ViewData["Title"] = "Home";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
+<div class="container mt-4">
+    <!-- Hero Section -->
+    <div class="jumbotron bg-light p-5 rounded mb-4">
+        <h1 class="display-4">Welcome to INF_SP Event Management</h1>
+        <p class="lead">Discover and join amazing events in your area</p>
+        <hr class="my-4">
+        <p>Browse upcoming events, connect with vendors, and manage your event experience all in one place.</p>
+        @if (Context.Session.GetString("UserId") == null)
+        {
+            <a class="btn btn-primary btn-lg" asp-controller="Account" asp-action="Register" role="button">Get Started</a>
+            <a class="btn btn-outline-secondary btn-lg" asp-controller="Events" asp-action="Index" role="button">Browse Events</a>
+        }
+        else
+        {
+            <a class="btn btn-primary btn-lg" asp-controller="Events" asp-action="Index" role="button">Browse All Events</a>
+        }
+    </div>
+
+    <!-- Upcoming Events Section -->
+    <h2 class="mb-4">Upcoming Events</h2>
+    
+    @if (Model.Any())
+    {
+        <div class="row">
+            @foreach (var item in Model)
+            {
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title">@item.Title</h5>
+                            <p class="card-text">
+                                @(item.Description.Length > 100 ? item.Description.Substring(0, 100) + "..." : item.Description)
+                            </p>
+                            <div class="text-muted small">
+                                <p class="mb-1">
+                                    <i class="bi bi-calendar"></i> @item.EventDate.ToString("MMM dd, yyyy")
+                                </p>
+                                <p class="mb-1">
+                                    <i class="bi bi-clock"></i> @item.StartTime.ToString(@"hh\:mm") - @item.EndTime.ToString(@"hh\:mm")
+                                </p>
+                                <p class="mb-1">
+                                    <i class="bi bi-geo-alt"></i> @item.Location
+                                </p>
+                                <p class="mb-1">
+                                    <i class="bi bi-people"></i> @item.Bookings?.Count / @item.Capacity attendees
+                                </p>
+                            </div>
+                            <span class="badge bg-secondary mt-2">@item.Category</span>
+                        </div>
+                        <div class="card-footer bg-transparent">
+                            <a asp-controller="Events" asp-action="Details" asp-route-id="@item.Id" class="btn btn-primary btn-sm w-100">View Details</a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+        
+        <div class="text-center mt-4">
+            <a asp-controller="Events" asp-action="Index" class="btn btn-outline-primary">View All Events</a>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info">
+            <p class="mb-0">No upcoming events at the moment. Check back soon!</p>
+        </div>
+    }
 </div>

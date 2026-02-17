@@ -12,7 +12,7 @@ namespace INF_SP.Models
         [Required]
         public int AttendeeId { get; set; }
         
-        public DateTime BookingDate { get; set; } = DateTime.Now;
+        public DateTime BookingDate { get; set; } = DateTime.UtcNow;
         
         public string Status { get; set; } = "Confirmed";
         

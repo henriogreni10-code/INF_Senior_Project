@@ -87,4 +87,17 @@
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        // Additional client-side validation
+        document.querySelector('form').addEventListener('submit', function(e) {
+            var startTime = document.querySelector('input[name="StartTime"]').value;
+            var endTime = document.querySelector('input[name="EndTime"]').value;
+            
+            if (startTime && endTime && startTime >= endTime) {
+                e.preventDefault();
+                alert('Start time must be before end time.');
+                return false;
+            }
+        });
+    </script>
 }

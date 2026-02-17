@@ -26,7 +26,7 @@
                             <h5 class="card-title">@booking.Event?.Title</h5>
                             <p class="card-text">
                                 <strong>Date:</strong> @booking.Event?.EventDate.ToString("MMMM dd, yyyy")<br>
-                                <strong>Time:</strong> @booking.Event?.StartTime.ToString(@"hh\:mm tt") - @booking.Event?.EndTime.ToString(@"hh\:mm tt")<br>
+                                <strong>Time:</strong> @booking.Event?.StartTime.ToString(@"hh\:mm") - @booking.Event?.EndTime.ToString(@"hh\:mm")<br>
                                 <strong>Location:</strong> @booking.Event?.Location<br>
                                 <strong>Organizer:</strong> @booking.Event?.Organizer?.Name<br>
                                 <strong>Registered:</strong> @booking.BookingDate.ToString("MMM dd, yyyy")
