@@ -15,7 +15,7 @@ namespace INF_SP.Data
         public DbSet<Booking> Bookings { get; set; }
         public DbSet<Vendor> Vendors { get; set; }
         public DbSet<Message> Messages { get; set; }
-
+        public DbSet<Rating> Ratings { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -26,6 +26,7 @@ namespace INF_SP.Data
             modelBuilder.Entity<Booking>().ToTable("bookings");
             modelBuilder.Entity<Vendor>().ToTable("vendors");
             modelBuilder.Entity<Message>().ToTable("messages");
+            modelBuilder.Entity<Rating>().ToTable("ratings");
 
             // Configure relationships
             modelBuilder.Entity<Event>()

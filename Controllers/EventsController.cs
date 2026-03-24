@@ -15,19 +15,49 @@ namespace INF_SP.Controllers
         }
 
         // GET: Events (Browse all events for attendees)
-        public async Task<IActionResult> Index(string searchString)
+        // GET: Events (Browse all events with search and filters)
+        public async Task<IActionResult> Index(string searchString, string location, DateTime? eventDate, string category)
         {
             var events = from e in _context.Events
                          where e.EventDate >= DateTime.UtcNow
                          select e;
 
+            // Search by title or description
             if (!string.IsNullOrEmpty(searchString))
             {
-                events = events.Where(e => e.Title.Contains(searchString) || 
-                                          e.Description.Contains(searchString));
+                events = events.Where(e => e.Title.Contains(searchString) ||
+                                        e.Description.Contains(searchString));
             }
 
-            return View(await events.Include(e => e.Organizer).ToListAsync());
+            // Filter by location
+            if (!string.IsNullOrEmpty(location))
+            {
+                events = events.Where(e => e.Location.Contains(location));
+            }
+
+            // Filter by date
+            if (eventDate.HasValue)
+            {
+                events = events.Where(e => e.EventDate.Date == eventDate.Value.Date);
+            }
+
+            // Filter by category
+            if (!string.IsNullOrEmpty(category) && category != "All")
+            {
+                events = events.Where(e => e.Category == category);
+            }
+
+            // Store filter values in ViewBag for the view
+            ViewBag.SearchString = searchString;
+            ViewBag.Location = location;
+            ViewBag.EventDate = eventDate;
+            ViewBag.Category = category;
+
+            return View(await events
+                .Include(e => e.Organizer)
+                .Include(e => e.Bookings)
+                .OrderBy(e => e.EventDate)
+                .ToListAsync());
         }
 
         // GET: Events/Details/5
@@ -41,6 +71,8 @@ namespace INF_SP.Controllers
             var eventItem = await _context.Events
                 .Include(e => e.Organizer)
                 .Include(e => e.Bookings)
+                .Include(e => e.Ratings)
+                .ThenInclude(r => r.User)
                 .FirstOrDefaultAsync(m => m.Id == id);
 
             if (eventItem == null)
@@ -55,6 +87,9 @@ namespace INF_SP.Controllers
                 var userId = int.Parse(userIdString);
                 ViewBag.IsRegistered = await _context.Bookings
                     .AnyAsync(b => b.EventId == id && b.AttendeeId == userId);
+                
+                ViewBag.UserRating = await _context.Ratings
+            .FirstOrDefaultAsync(r => r.EventId == id && r.UserId == userId);
             }
 
             return View(eventItem);
@@ -120,22 +155,22 @@ namespace INF_SP.Controllers
             if (string.IsNullOrEmpty(userIdString))
             {
                 return RedirectToAction("Login", "Account");
-        }
+            }
 
             eventItem.OrganizerId = int.Parse(userIdString);
             eventItem.EventDate = DateTime.SpecifyKind(
             eventItem.EventDate, DateTimeKind.Utc);
 
-        if (ModelState.IsValid)
-        {
-            _context.Add(eventItem);
-            await _context.SaveChangesAsync();
-            TempData["Success"] = "Event created successfully!";
-            return RedirectToAction(nameof(MyEvents));
+            if (ModelState.IsValid)
+            {
+                _context.Add(eventItem);
+                await _context.SaveChangesAsync();
+                TempData["Success"] = "Event created successfully!";
+                return RedirectToAction(nameof(MyEvents));
+            }
+
+            return View(eventItem);
         }
-    
-        return View(eventItem);
-    }
         // GET: Events/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
@@ -306,5 +341,104 @@ namespace INF_SP.Controllers
         {
             return _context.Events.Any(e => e.Id == id);
         }
+        // GET: Events/Attendees/5 (View registered attendees for an event)
+        public async Task<IActionResult> Attendees(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var userIdString = HttpContext.Session.GetString("UserId");
+            if (string.IsNullOrEmpty(userIdString))
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var userId = int.Parse(userIdString);
+
+            var eventItem = await _context.Events
+                .Include(e => e.Organizer)
+                .Include(e => e.Bookings)
+                    .ThenInclude(b => b.Attendee)
+                .FirstOrDefaultAsync(e => e.Id == id);
+
+            if (eventItem == null)
+            {
+                return NotFound();
+            }
+
+            // Check if current user is the organizer
+            if (eventItem.OrganizerId != userId)
+            {
+                TempData["Error"] = "You don't have permission to view attendees for this event.";
+                return RedirectToAction(nameof(MyEvents));
+            }
+
+            return View(eventItem);
+        }
+
+        // POST: Events/RateEvent
+[HttpPost]
+[ValidateAntiForgeryToken]
+public async Task<IActionResult> RateEvent(int eventId, int stars, string comment)
+{
+    var userIdString = HttpContext.Session.GetString("UserId");
+    if (string.IsNullOrEmpty(userIdString))
+    {
+        return RedirectToAction("Login", "Account");
+    }
+
+    var userId = int.Parse(userIdString);
+
+    // Check if user is registered for this event
+    var booking = await _context.Bookings
+        .FirstOrDefaultAsync(b => b.EventId == eventId && b.AttendeeId == userId);
+
+    if (booking == null)
+    {
+        TempData["Error"] = "You must be registered for this event to rate it.";
+        return RedirectToAction(nameof(Details), new { id = eventId });
+    }
+
+    // Check if event has already happened
+    var eventItem = await _context.Events.FindAsync(eventId);
+    if (eventItem != null && eventItem.EventDate > DateTime.UtcNow)
+    {
+        TempData["Error"] = "You can only rate events that have already occurred.";
+        return RedirectToAction(nameof(Details), new { id = eventId });
+    }
+
+    // Check if user already rated this event
+    var existingRating = await _context.Ratings
+        .FirstOrDefaultAsync(r => r.EventId == eventId && r.UserId == userId);
+
+    if (existingRating != null)
+    {
+        // Update existing rating
+        existingRating.Stars = stars;
+        existingRating.Comment = comment ?? string.Empty;
+        existingRating.CreatedAt = DateTime.UtcNow;
+        _context.Update(existingRating);
+        TempData["Success"] = "Your rating has been updated!";
+    }
+    else
+    {
+        // Create new rating
+        var rating = new Rating
+        {
+            EventId = eventId,
+            UserId = userId,
+            Stars = stars,
+            Comment = comment ?? string.Empty
+        };
+        _context.Ratings.Add(rating);
+        TempData["Success"] = "Thank you for rating this event!";
+    }
+
+    await _context.SaveChangesAsync();
+    return RedirectToAction(nameof(Details), new { id = eventId });
+}
+
     }
 }
