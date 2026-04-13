@@ -1,46 +1,118 @@
 ﻿@model IEnumerable<INF_SP.Models.Vendor>
 
 @{
-    ViewData["Title"] = "Vendor Directory";
+    ViewData["Title"] = "Vendors";
 }
 
 <div class="container mt-4">
-    <h2>Vendor Directory</h2>
-    
-    <form asp-action="Index" method="get" class="mb-4">
-        <div class="input-group">
-            <input type="text" name="searchString" class="form-control" placeholder="Search vendors..." value="@ViewData["SearchString"]">
-            <button class="btn btn-primary" type="submit">Search</button>
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2>Vendor Directory</h2>
+            <p class="text-muted">Find professional vendors for your events</p>
         </div>
-    </form>
+        <div class="col-md-4">
+            @if (Context.Session.GetString("UserType") == "Vendor")
+            {
+                <a asp-action="MyProfile" class="btn btn-primary float-end">
+                    <i class="bi bi-briefcase"></i> My Profile
+                </a>
+            }
+        </div>
+    </div>
 
-    <div class="row">
-        @if (Model.Any())
-        {
+    <!-- Search Form -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form asp-action="Index" method="get">
+                <div class="row">
+                    <div class="col-md-10">
+                        <input type="text" 
+                               name="searchString" 
+                               class="form-control" 
+                               placeholder="Search by business name or service type..." 
+                               value="@ViewBag.SearchString">
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-primary w-100">
+                            Search
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Results Summary -->
+    <div class="mb-3">
+        <p class="text-muted">
+            <strong>@Model.Count()</strong> vendor(s) found
+        </p>
+    </div>
+
+    <!-- Vendors Grid -->
+    @if (Model.Any())
+    {
+        <div class="row">
             @foreach (var vendor in Model)
             {
                 <div class="col-md-6 col-lg-4 mb-4">
-                    <div class="card h-100">
+                    <div class="card h-100 shadow-sm">
                         <div class="card-body">
                             <h5 class="card-title">@vendor.BusinessName</h5>
-                            <p class="badge bg-info text-dark">@vendor.ServiceType</p>
-                            <p class="card-text">@vendor.Description.Substring(0, Math.Min(100, vendor.Description.Length))...</p>
-                            <p class="text-muted">
+                            
+                            <p class="mb-2">
+                                <span class="badge bg-primary">@vendor.ServiceType</span>
+                            </p>
+
+                            <p class="card-text text-muted">
+                                @if (vendor.Description.Length > 150)
+                                {
+                                    @vendor.Description.Substring(0, 150)<text>...</text>
+                                }
+                                else
+                                {
+                                    @vendor.Description
+                                }
+                            </p>
+
+                            <p class="mb-2">
                                 <strong>Price Range:</strong> @vendor.PriceRange
                             </p>
+
+                            <p class="text-muted small">
+                                <i class="bi bi-person"></i> @vendor.User?.Name
+                            </p>
                         </div>
-                        <div class="card-footer">
-                            <a asp-action="Details" asp-route-id="@vendor.Id" class="btn btn-primary btn-sm">View Profile</a>
+                        <div class="card-footer bg-transparent">
+                            <a asp-action="Details" asp-route-id="@vendor.Id" class="btn btn-outline-primary w-100">
+                                View Profile & Contact
+                            </a>
                         </div>
                     </div>
                 </div>
             }
-        }
-        else
-        {
-            <div class="col-12">
-                <div class="alert alert-info">No vendors found.</div>
-            </div>
-        }
-    </div>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info text-center">
+            <h4>No Vendors Found</h4>
+            <p>No vendors match your search criteria.</p>
+            @if (!string.IsNullOrEmpty(ViewBag.SearchString as string))
+            {
+                <a asp-action="Index" class="btn btn-primary">Clear Search</a>
+            }
+        </div>
+    }
 </div>
+
+<style>
+    .card {
+        transition: transform 0.2s;
+    }
+    
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2) !important;
+    }
+</style>

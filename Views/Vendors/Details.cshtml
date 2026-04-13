@@ -42,34 +42,58 @@
                             <th>Email:</th>
                             <td>@Model.User?.Email</td>
                         </tr>
+                        <tr>
+                            <th>Member Since:</th>
+                            <td>@Model.CreatedAt.ToString("MMMM yyyy")</td>
+                        </tr>
                     </table>
                 </div>
                 
                 <div class="col-md-4">
-                    @if (Context.Session.GetString("UserId") != null && Context.Session.GetString("UserId") != Model.UserId.ToString())
-                    {
-                        <div class="card">
-                            <div class="card-header">
-                                <h5>Contact Vendor</h5>
+            <!-- Contact Form - For Organizers to message vendors -->
+            @if (Context.Session.GetString("UserId") != null && 
+                 Context.Session.GetString("UserType") == "Organizer")
+            {
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Contact This Vendor</h5>
+                    </div>
+                    <div class="card-body">
+                        <form asp-controller="Messages" asp-action="Send" method="post">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="recipientId" value="@Model.UserId" />
+                            <input type="hidden" name="vendorId" value="@Model.Id" />
+                            
+                            <div class="mb-3">
+                                <label for="messageText" class="form-label">Your Message</label>
+                                <textarea name="messageText" id="messageText" class="form-control" rows="5" placeholder="Tell them about your event or ask questions..." required></textarea>
                             </div>
-                            <div class="card-body">
-                                <form asp-action="SendMessage" method="post">
-                                    <input type="hidden" name="vendorId" value="@Model.Id" />
-                                    <div class="mb-3">
-                                        <label for="messageText" class="form-label">Message</label>
-                                        <textarea name="messageText" class="form-control" rows="4" required></textarea>
-                                    </div>
-                                    <button type="submit" class="btn btn-primary w-100">Send Message</button>
-                                    @Html.AntiForgeryToken()
-                                </form>
-                            </div>
-                        </div>
-                    }
+                            
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="bi bi-send"></i> Send Message
+                            </button>
+                        </form>
+                    </div>
                 </div>
-            </div>
+            }
+            else if (Context.Session.GetString("UserId") == null)
+            {
+                <div class="alert alert-info">
+                    <p><strong>Want to contact this vendor?</strong></p>
+                    <p>Please <a asp-controller="Account" asp-action="Login">login</a> as an Organizer to send messages.</p>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info">
+                    <p><strong>Contact Information:</strong></p>
+                    <p>Email: @Model.User?.Email</p>
+                </div>
+            }
         </div>
-        <div class="card-footer">
-            <a asp-action="Index" class="btn btn-secondary">Back to Directory</a>
-        </div>
+    </div>
+
+    <div class="mt-3">
+        <a asp-action="Index" class="btn btn-secondary">Back to Vendors</a>
     </div>
 </div>

@@ -1,0 +1,198 @@
+@model IEnumerable<INF_SP.Models.Message>
+
+@{
+    ViewData["Title"] = "Messages";
+    var sentMessages = ViewBag.SentMessages as List<INF_SP.Models.Message>;
+}
+
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2>Messages</h2>
+            <p class="text-muted">Inbox and Sent Messages</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <a asp-action="Compose" class="btn btn-primary">
+                <i class="bi bi-envelope"></i> Compose New Message
+            </a>
+        </div>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show">
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show">
+            @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Stats -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5>Received</h5>
+                    <p class="display-6">@Model.Count()</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5>Unread</h5>
+                    <p class="display-6 text-warning">@ViewBag.UnreadCount</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5>Sent</h5>
+                    <p class="display-6">@(sentMessages?.Count ?? 0)</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabs -->
+    <ul class="nav nav-tabs" id="messageTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="inbox-tab" data-bs-toggle="tab" data-bs-target="#inbox" type="button">
+                Inbox (@Model.Count())
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="sent-tab" data-bs-toggle="tab" data-bs-target="#sent" type="button">
+                Sent (@(sentMessages?.Count ?? 0))
+            </button>
+        </li>
+    </ul>
+
+    <div class="tab-content" id="messageTabContent">
+        <!-- Inbox Tab -->
+        <div class="tab-pane fade show active" id="inbox" role="tabpanel">
+            @if (Model.Any())
+            {
+                <div class="card">
+                    <div class="list-group list-group-flush">
+                        @foreach (var message in Model)
+                        {
+                            <div class="list-group-item @(!message.IsRead ? "bg-light" : "")">
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <h6>
+                                            <strong>From: @message.Sender?.Name</strong>
+                                            @if (!message.IsRead)
+                                            {
+                                                <span class="badge bg-warning text-dark">New</span>
+                                            }
+                                        </h6>
+                                        <p class="text-muted mb-1">
+                                            <small>@message.SentAt.ToString("MMM dd, yyyy hh:mm tt")</small>
+                                        </p>
+                                        @if (message.VendorId != null)
+                                        {
+                                            <p class="text-muted mb-1">
+                                                <small><strong>Regarding:</strong> @message.Vendor?.BusinessName</small>
+                                            </p>
+                                        }
+                                        <p class="mb-2">@message.MessageText</p>
+                                    </div>
+                                    <div class="col-md-4 text-end">
+                                        @if (!message.IsRead)
+                                        {
+                                            <form asp-action="MarkAsRead" asp-route-messageId="@message.Id" method="post" class="d-inline mb-2">
+                                                @Html.AntiForgeryToken()
+                                                <button type="submit" class="btn btn-sm btn-success">Mark as Read</button>
+                                            </form>
+                                            <br>
+                                        }
+                                        
+                                        <button class="btn btn-sm btn-primary mb-2" data-bs-toggle="collapse" data-bs-target="#reply-@message.Id">
+                                            Reply
+                                        </button>
+                                        <br>
+                                        
+                                        <form asp-action="Delete" asp-route-messageId="@message.Id" method="post" class="d-inline" onsubmit="return confirm('Delete this message?');">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                                        </form>
+                                    </div>
+                                </div>
+                                
+                                <!-- Reply Form (Collapsible) -->
+                                <div class="collapse mt-3" id="reply-@message.Id">
+                                    <div class="card card-body">
+                                        <form asp-action="Reply" asp-route-originalMessageId="@message.Id" method="post">
+                                            @Html.AntiForgeryToken()
+                                            <div class="mb-3">
+                                                <label class="form-label">Reply to @message.Sender?.Name:</label>
+                                                <textarea name="messageText" class="form-control" rows="3" placeholder="Type your reply..." required></textarea>
+                                            </div>
+                                            <button type="submit" class="btn btn-primary">Send Reply</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info text-center mt-3">
+                    <h5>No Messages</h5>
+                    <p>You haven't received any messages yet.</p>
+                </div>
+            }
+        </div>
+
+        <!-- Sent Tab -->
+        <div class="tab-pane fade" id="sent" role="tabpanel">
+            @if (sentMessages != null && sentMessages.Any())
+            {
+                <div class="card">
+                    <div class="list-group list-group-flush">
+                        @foreach (var message in sentMessages)
+                        {
+                            <div class="list-group-item">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <h6>
+                                            <strong>To: @message.Recipient?.Name</strong>
+                                        </h6>
+                                        <p class="text-muted mb-1">
+                                            <small>@message.SentAt.ToString("MMM dd, yyyy hh:mm tt")</small>
+                                        </p>
+                                        @if (message.VendorId != null)
+                                        {
+                                            <p class="text-muted mb-1">
+                                                <small><strong>Regarding:</strong> @message.Vendor?.BusinessName</small>
+                                            </p>
+                                        }
+                                        <p class="mb-0">@message.MessageText</p>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info text-center mt-3">
+                    <h5>No Sent Messages</h5>
+                    <p>You haven't sent any messages yet.</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>

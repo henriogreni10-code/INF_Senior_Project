@@ -1,0 +1,111 @@
+@model IEnumerable<INF_SP.Models.Message>
+
+@{
+    ViewData["Title"] = "Inbox";
+}
+
+<div class="container mt-4">
+    <h2>Vendor Inbox</h2>
+    <p class="text-muted">Messages from event organizers</p>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show">
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show">
+            @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Total Messages</h5>
+                    <p class="display-6">@Model.Count()</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Unread Messages</h5>
+                    <p class="display-6 text-warning">@ViewBag.UnreadCount</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (Model.Any())
+    {
+        <div class="card">
+            <div class="card-header">
+                <h5>All Messages</h5>
+            </div>
+            <div class="list-group list-group-flush">
+                @foreach (var message in Model)
+                {
+                    <div class="list-group-item @(!message.IsRead ? "bg-light" : "")">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <h6>
+                                    <strong>From: @message.Sender?.Name</strong>
+                                    @if (!message.IsRead)
+                                    {
+                                        <span class="badge bg-warning text-dark">New</span>
+                                    }
+                                </h6>
+                                <p class="text-muted mb-1">
+                                    <small>@message.SentAt.ToString("MMM dd, yyyy hh:mm tt")</small>
+                                </p>
+                                @if (message.VendorId != null)
+                                {
+                                    <p class="text-muted mb-2">
+                                        <small>Regarding: @message.Vendor?.BusinessName</small>
+                                    </p>
+                                }
+                                <p class="mb-2">@message.MessageText</p>
+                                <p class="mb-0">
+                                    <small class="text-muted">Reply to: @message.Sender?.Email</small>
+                                </p>
+                            </div>
+                            <div class="col-md-4 text-end">
+                                @if (!message.IsRead)
+                                {
+                                    <form asp-action="MarkAsRead" asp-route-messageId="@message.Id" method="post" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-success mb-2">Mark as Read</button>
+                                    </form>
+                                    <br>
+                                }
+                                <form asp-action="DeleteMessage" asp-route-messageId="@message.Id" method="post" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this message?');">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                                </form>
+                                <br><br>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info text-center">
+            <h4>No Messages Yet</h4>
+            <p>You haven't received any messages from event organizers yet.</p>
+        </div>
+    }
+
+    <div class="mt-4">
+        <a asp-action="MyProfile" class="btn btn-secondary">Back to My Profile</a>
+    </div>
+</div>

@@ -1,0 +1,62 @@
+@{
+    ViewData["Title"] = "Compose Message";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4>Compose New Message</h4>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Send" method="post">
+                        @Html.AntiForgeryToken()
+                        
+                        @if (ViewBag.RecipientId != null)
+                        {
+                            <input type="hidden" name="recipientId" value="@ViewBag.RecipientId" />
+                            
+                            <div class="mb-3">
+                                <label class="form-label"><strong>To:</strong></label>
+                                <p class="form-control-plaintext">@ViewBag.RecipientName</p>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="alert alert-warning">
+                                <p>Direct compose not available. Please send messages from vendor profiles or event pages.</p>
+                                <a asp-controller="Vendors" asp-action="Index" class="btn btn-primary">Browse Vendors</a>
+                            </div>
+                        }
+                        
+                        @if (ViewBag.VendorId != null)
+                        {
+                            <input type="hidden" name="vendorId" value="@ViewBag.VendorId" />
+                            
+                            <div class="mb-3">
+                                <label class="form-label"><strong>Regarding:</strong></label>
+                                <p class="form-control-plaintext">@ViewBag.VendorName</p>
+                            </div>
+                        }
+                        
+                        @if (ViewBag.RecipientId != null)
+                        {
+                            <div class="mb-3">
+                                <label for="messageText" class="form-label">Message</label>
+                                <textarea name="messageText" id="messageText" class="form-control" rows="6" placeholder="Type your message here..." required></textarea>
+                            </div>
+
+                            <div class="d-flex gap-2">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-send"></i> Send Message
+                                </button>
+                                <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+                            </div>
+                        }
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

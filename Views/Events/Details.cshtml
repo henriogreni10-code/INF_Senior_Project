@@ -23,6 +23,34 @@
     <div class="card">
         <div class="card-header">
             <h2>@Model.Title</h2>
+            <!-- Display Average Rating -->
+            @if (Model.RatingCount > 0)
+            {
+                <div class="mt-2">
+                    <span class="text-warning">
+                        @for (int i = 1; i <= 5; i++)
+                        {
+                            if (i <= Model.AverageRating)
+                            {
+                                <i class="bi bi-star-fill"></i>
+                            }
+                            else if (i - 0.5 <= Model.AverageRating)
+                            {
+                                <i class="bi bi-star-half"></i>
+                            }
+                            else
+                            {
+                                <i class="bi bi-star"></i>
+                            }
+                        }
+                    </span>
+                    <span class="ms-2">@Model.AverageRating / 5.0 (@Model.RatingCount reviews)</span>
+                </div>
+            }
+            else
+            {
+                <p class="text-muted mt-2">No ratings yet</p>
+            }
         </div>
         <div class="card-body">
             <div class="row">
@@ -89,9 +117,131 @@
                     }
                 </div>
             </div>
+
+            <!-- RATING SECTION - Only for Registered Attendees -->
+            @if (Context.Session.GetString("UserId") != null && 
+                 Context.Session.GetString("UserType") == "Attendee" && 
+                 ViewBag.IsRegistered == true)
+            {
+                <hr class="my-4">
+                
+                @if (Model.EventDate < DateTime.UtcNow)
+                {
+                    <h5>Rate This Event</h5>
+                    
+                    @if (ViewBag.UserRating != null)
+                    {
+                        var userRating = ViewBag.UserRating as INF_SP.Models.Rating;
+                        <div class="alert alert-info">
+                            You rated this event @userRating.Stars stars. You can update your rating below.
+                        </div>
+                    }
+                    
+                    <form asp-action="RateEvent" method="post" id="ratingForm">
+                        <input type="hidden" name="eventId" value="@Model.Id" />
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Your Rating *</label>
+                            <div class="rating-stars">
+                                @for (int i = 5; i >= 1; i--)
+                                {
+                                    var isChecked = ViewBag.UserRating != null && ((INF_SP.Models.Rating)ViewBag.UserRating).Stars == i;
+                                    <input type="radio" name="stars" value="@i" id="star@(i)" required @(isChecked ? "checked" : "") />
+                                    <label for="star@(i)" title="@i stars">★</label>
+                                }
+                            </div>
+                            <small class="text-muted">Click on the stars to rate (5 = Excellent, 1 = Poor)</small>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="comment" class="form-label">Comment (Optional)</label>
+                            <textarea name="comment" id="comment" class="form-control" rows="3" placeholder="Share your experience...">@(ViewBag.UserRating != null ? ((INF_SP.Models.Rating)ViewBag.UserRating).Comment : "")</textarea>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary">
+                            Submit Rating
+                        </button>
+                        @Html.AntiForgeryToken()
+                    </form>
+                }
+                else
+                {
+                    <div class="alert alert-warning">
+                        You can rate this event after it has occurred.
+                    </div>
+                }
+            }
+
+            <!-- Display All Ratings -->
+            @if (Model.Ratings != null && Model.Ratings.Any())
+            {
+                <hr class="my-4">
+                <h5>Reviews (@Model.RatingCount)</h5>
+                
+                @foreach (var rating in Model.Ratings.OrderByDescending(r => r.CreatedAt))
+                {
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h6 class="mb-1">
+                                        <strong>@rating.User?.Name</strong>
+                                    </h6>
+                                    <div class="text-warning mb-2">
+                                        @for (int i = 1; i <= 5; i++)
+                                        {
+                                            if (i <= rating.Stars)
+                                            {
+                                                <i class="bi bi-star-fill"></i>
+                                            }
+                                            else
+                                            {
+                                                <i class="bi bi-star"></i>
+                                            }
+                                        }
+                                        <span class="ms-2 text-muted">@rating.Stars / 5</span>
+                                    </div>
+                                </div>
+                                <small class="text-muted">@rating.CreatedAt.ToString("MMM dd, yyyy")</small>
+                            </div>
+                            @if (!string.IsNullOrEmpty(rating.Comment))
+                            {
+                                <p class="mb-0">@rating.Comment</p>
+                            }
+                        </div>
+                    </div>
+                }
+            }
         </div>
         <div class="card-footer">
             <a asp-action="Index" class="btn btn-secondary">Back to Events</a>
         </div>
     </div>
 </div>
+
+<style>
+    /* Star Rating Input Styles */
+    .rating-stars {
+        display: flex;
+        flex-direction: row-reverse;
+        justify-content: flex-end;
+        font-size: 3rem;
+        gap: 5px;
+    }
+    
+    .rating-stars input {
+        display: none;
+    }
+    
+    .rating-stars label {
+        color: #ddd;
+        cursor: pointer;
+        transition: color 0.2s;
+    }
+    
+    .rating-stars label:hover,
+    .rating-stars label:hover ~ label,
+    .rating-stars input:checked ~ label {
+        color: #ffc107;
+    }
+</style>

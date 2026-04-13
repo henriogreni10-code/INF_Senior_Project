@@ -6,10 +6,27 @@
     <title>@ViewData["Title"] - INF_SP</title>
     <script type="importmap"></script>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/INF_SP.styles.css" asp-append-version="true" />
 </head>
 <body>
+    @inject INF_SP.Data.ApplicationDbContext DbContext
+
+    @functions {
+        public int GetUnreadMessageCount()
+        {
+            var userIdString = Context.Session.GetString("UserId");
+            if (string.IsNullOrEmpty(userIdString))
+            {
+                return 0;
+            }
+            
+            var userId = int.Parse(userIdString);
+            return DbContext.Messages.Count(m => m.RecipientId == userId && !m.IsRead);
+        }
+    }
+
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container-fluid">
@@ -20,76 +37,114 @@
                 </button>
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
-    <li class="nav-item">
-        <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-    </li>
-    
-    @if (Context.Session.GetString("UserId") != null)
-    {
-        var userType = Context.Session.GetString("UserType");
-        
-        @if (userType == "Organizer")
-        {
-            <li class="nav-item">
-                <a class="nav-link text-dark" asp-controller="Events" asp-action="MyEvents">My Events</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link text-dark" asp-controller="Events" asp-action="Create">Create Event</a>
-            </li>
-        }
-        
-        @if (userType == "Attendee")
-        {
-            <li class="nav-item">
-                <a class="nav-link text-dark" asp-controller="Events" asp-action="Index">Browse Events</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link text-dark" asp-controller="Events" asp-action="MyRegistrations">My Registrations</a>
-            </li>
-        }
-        
-        @if (userType == "Vendor")
-        {
-            <li class="nav-item">
-                <a class="nav-link text-dark" asp-controller="Vendors" asp-action="MyProfile">My Profile</a>
-            </li>
-        }
-        
-        <li class="nav-item">
-            <a class="nav-link text-dark" asp-controller="Vendors" asp-action="Index">Vendors</a>
-        </li>
-    }
-    else
-    {
-        <li class="nav-item">
-            <a class="nav-link text-dark" asp-controller="Events" asp-action="Index">Browse Events</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link text-dark" asp-controller="Vendors" asp-action="Index">Vendors</a>
-        </li>
-    }
-</ul>
-<ul class="navbar-nav">
-    @if (Context.Session.GetString("UserId") != null)
-    {
-        <li class="nav-item">
-            <span class="nav-link text-dark">Hello, @Context.Session.GetString("UserName")</span>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link text-dark" asp-controller="Account" asp-action="Logout">Logout</a>
-        </li>
-    }
-    else
-    {
-        <li class="nav-item">
-            <a class="nav-link text-dark" asp-controller="Account" asp-action="Login">Login</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link text-dark" asp-controller="Account" asp-action="Register">Register</a>
-        </li>
-    }
-</ul>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                        </li>
+                        
+                        @if (Context.Session.GetString("UserId") != null)
+                        {
+                            var userType = Context.Session.GetString("UserType");
+                            
+                            @if (userType == "Organizer")
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-controller="Events" asp-action="MyEvents">My Events</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-controller="Events" asp-action="Create">Create Event</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-controller="Messages" asp-action="Index">
+                                        Messages
+                                        @{
+                                            var unreadCount = GetUnreadMessageCount();
+                                            if (unreadCount > 0)
+                                            {
+                                                <span class="badge bg-danger">@unreadCount</span>
+                                            }
+                                        }
+                                    </a>
+                                </li>
+                            }
+                            
+                            @if (userType == "Attendee")
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-controller="Events" asp-action="Index">Browse Events</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-controller="Events" asp-action="MyRegistrations">My Registrations</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-controller="Messages" asp-action="Index">
+                                        Messages
+                                        @{
+                                            var unreadCount = GetUnreadMessageCount();
+                                            if (unreadCount > 0)
+                                            {
+                                                <span class="badge bg-danger">@unreadCount</span>
+                                            }
+                                        }
+                                    </a>
+                                </li>
+                            }
+                            
+                            @if (userType == "Vendor")
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-controller="Vendors" asp-action="MyProfile">My Profile</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-controller="Vendors" asp-action="BrowseEvents">Browse Events</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-controller="Messages" asp-action="Index">
+                                        Messages
+                                        @{
+                                            var unreadCount = GetUnreadMessageCount();
+                                            if (unreadCount > 0)
+                                            {
+                                                <span class="badge bg-danger">@unreadCount</span>
+                                            }
+                                        }
+                                    </a>
+                                </li>
+                            }
 
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Vendors" asp-action="Index">Vendors</a>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Events" asp-action="Index">Browse Events</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Vendors" asp-action="Index">Vendors</a>
+                            </li>
+                        }
+                    </ul>
+                    <ul class="navbar-nav">
+                        @if (Context.Session.GetString("UserId") != null)
+                        {
+                            <li class="nav-item">
+                                <span class="nav-link text-dark">Hello, @Context.Session.GetString("UserName")</span>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Account" asp-action="Logout">Logout</a>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Account" asp-action="Login">Login</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Account" asp-action="Register">Register</a>
+                            </li>
+                        }
+                    </ul>
                 </div>
             </div>
         </nav>
